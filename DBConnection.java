@@ -2,21 +2,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class DBConnection {
-
     public static Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            String dbUrl = System.getenv("DB_URL");
-            if (dbUrl == null) dbUrl = "jdbc:mysql://localhost:3306/smart_campus";
-            String dbUser = System.getenv("DB_USER");
-            if (dbUser == null) dbUser = "root";
-            String dbPassword = System.getenv("DB_PASSWORD");
-            if (dbPassword == null) dbPassword = "";
-            Connection con = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            System.out.println("Database Connected Successfully");
-            return con;
-        } catch (Exception e) {
-            System.out.println("Database connection failed. Check DB_URL, DB_USER, and DB_PASSWORD environment variables and ensure MySQL is running.");
+            String url = AppConfig.get("DB_URL", "jdbc:mysql://localhost:3306/smart_campus");
+            String user = AppConfig.get("DB_USER", "root");
+            String password = AppConfig.get("DB_PASSWORD", "");
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception exception) {
+            System.out.println("Database connection failed. Check the DB_* settings and ensure MySQL is running.");
             return null;
         }
     }
