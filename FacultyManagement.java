@@ -1,43 +1,41 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 public class FacultyManagement {
-
-    Scanner sc = new Scanner(System.in);
+    private final Scanner scanner = ConsoleInput.scanner();
 
     public void addFaculty() {
-
-        try {
-            Connection con = DBConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection()) {
+            if (connection == null) return;
 
             System.out.print("Enter Faculty ID: ");
-            int id = sc.nextInt();
-            sc.nextLine();
-
+            int id = Integer.parseInt(scanner.nextLine().trim());
             System.out.print("Enter Faculty Name: ");
-            String name = sc.nextLine();
-
+            String name = scanner.nextLine().trim();
             System.out.print("Enter Department: ");
-            String department = sc.nextLine();
-
+            String department = scanner.nextLine().trim();
             System.out.print("Enter Email: ");
-            String email = sc.nextLine();
+            String email = scanner.nextLine().trim();
 
-            String query = "INSERT INTO faculty VALUES(?,?,?,?)";
+            if (id <= 0 || name.isBlank() || department.isBlank() || email.isBlank()) {
+                System.out.println("Please enter valid faculty details.");
+                return;
+            }
 
-            PreparedStatement pst = con.prepareStatement(query);
-
-            pst.setInt(1, id);
-            pst.setString(2, name);
-            pst.setString(3, department);
-            pst.setString(4, email);
-
-            pst.executeUpdate();
-
+            String sql = "INSERT INTO faculty (faculty_id, faculty_name, department, email) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setInt(1, id);
+                statement.setString(2, name);
+                statement.setString(3, department);
+                statement.setString(4, email);
+                statement.executeUpdate();
+            }
             System.out.println("Faculty Added Successfully");
-
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (NumberFormatException exception) {
+            System.out.println("Faculty ID must be a valid number.");
+        } catch (Exception exception) {
+            System.out.println("Unable to add faculty. Check the entered details and database connection.");
         }
     }
 }
