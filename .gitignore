@@ -1,2 +1,21 @@
+# Java / Maven build output
+target/
+build/
 *.class
 *.jar
+
+# Local secrets
+.env
+.env.*
+
+# IDE files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS noise
+.DS_Store
+Thumbs.db
