@@ -1,43 +1,42 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 public class EventManagement {
-
-    Scanner sc = new Scanner(System.in);
+    private final Scanner scanner = ConsoleInput.scanner();
 
     public void addEvent() {
-
-        try {
-            Connection con = DBConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection()) {
+            if (connection == null) return;
 
             System.out.print("Enter Event ID: ");
-            int id = sc.nextInt();
-            sc.nextLine();
-
+            int id = Integer.parseInt(scanner.nextLine().trim());
             System.out.print("Enter Event Name: ");
-            String name = sc.nextLine();
-
+            String name = scanner.nextLine().trim();
             System.out.print("Enter Event Date (YYYY-MM-DD): ");
-            String date = sc.nextLine();
-
+            Date date = Date.valueOf(scanner.nextLine().trim());
             System.out.print("Enter Location: ");
-            String location = sc.nextLine();
+            String location = scanner.nextLine().trim();
 
-            String query = "INSERT INTO events VALUES(?,?,?,?)";
+            if (id <= 0 || name.isBlank() || location.isBlank()) {
+                System.out.println("Please enter valid event details.");
+                return;
+            }
 
-            PreparedStatement pst = con.prepareStatement(query);
-
-            pst.setInt(1, id);
-            pst.setString(2, name);
-            pst.setString(3, date);
-            pst.setString(4, location);
-
-            pst.executeUpdate();
-
+            String sql = "INSERT INTO events (event_id, event_name, event_date, location) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setInt(1, id);
+                statement.setString(2, name);
+                statement.setDate(3, date);
+                statement.setString(4, location);
+                statement.executeUpdate();
+            }
             System.out.println("Event Added Successfully");
-
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (IllegalArgumentException exception) {
+            System.out.println("Use a valid date in YYYY-MM-DD format and a numeric event ID.");
+        } catch (Exception exception) {
+            System.out.println("Unable to add event. Check the entered details and database connection.");
         }
     }
 }
